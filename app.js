@@ -461,9 +461,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const card = document.createElement('article');
             card.className = 'card';
-            const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lon}`;
-            const wazeUrl = `https://waze.com/ul?ll=${station.lat},${station.lon}&navigate=yes`;
-            const appleMapsUrl = `http://maps.apple.com/?daddr=${station.lat},${station.lon}`;
 
             card.innerHTML = `
                 <div class="card-info">
@@ -479,19 +476,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="card-nav">
                     <div class="nav-buttons">
-                        <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer" class="btn-nav" title="${translations[currentLang].navGoogleMaps}">
+                        <a href="#" class="btn-nav btn-nav-google" title="${translations[currentLang].navGoogleMaps}">
                             <img src="assets/google-maps.svg" alt="Google Maps" class="nav-icon">
                         </a>
-                        <a href="${wazeUrl}" target="_blank" rel="noopener noreferrer" class="btn-nav" title="${translations[currentLang].navWaze}">
+                        <a href="#" class="btn-nav btn-nav-waze" title="${translations[currentLang].navWaze}">
                             <img src="assets/waze.svg" alt="Waze" class="nav-icon">
                         </a>
-                        <a href="${appleMapsUrl}" target="_blank" rel="noopener noreferrer" class="btn-nav" title="${translations[currentLang].navAppleMaps}">
+                        <a href="#" class="btn-nav btn-nav-apple" title="${translations[currentLang].navAppleMaps}">
                             <img src="assets/apple-maps.svg" alt="Apple Maps" class="nav-icon">
                         </a>
                     </div>
                 </div>
             `;
             resultsContainer.appendChild(card);
+
+            // Escuchar clics para realizar redirección inteligente (deep linking con fallback web)
+            const googleBtn = card.querySelector('.btn-nav-google');
+            const wazeBtn = card.querySelector('.btn-nav-waze');
+            const appleBtn = card.querySelector('.btn-nav-apple');
+
+            googleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openGoogleMaps(station.lat, station.lon);
+            });
+            wazeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openWaze(station.lat, station.lon);
+            });
+            appleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openAppleMaps(station.lat, station.lon);
+            });
         });
     }
 
@@ -615,6 +630,73 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.custom-select-container').forEach(container => {
             container.classList.remove('active');
         });
+    }
+
+    function openGoogleMaps(lat, lon) {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isAndroid = /Android/.test(navigator.userAgent);
+        
+        let deepLink = '';
+        if (isIOS) {
+            deepLink = `comgooglemaps://?daddr=${lat},${lon}&directionsmode=driving`;
+        } else if (isAndroid) {
+            deepLink = `google.navigation:q=${lat},${lon}`;
+        }
+        
+        const webLink = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+        
+        if (!deepLink) {
+            window.open(webLink, '_blank');
+            return;
+        }
+        
+        const start = Date.now();
+        window.location.href = deepLink;
+        
+        setTimeout(() => {
+            if (document.hidden || document.webkitHidden) return;
+            if (Date.now() - start < 2000) {
+                window.open(webLink, '_blank');
+            }
+        }, 1500);
+    }
+
+    function openWaze(lat, lon) {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isAndroid = /Android/.test(navigator.userAgent);
+        const isMobile = isIOS || isAndroid;
+        
+        const deepLink = `waze://?ll=${lat},${lon}&navigate=yes`;
+        const webLink = `https://waze.com/ul?ll=${lat},${lon}&navigate=yes`;
+        
+        if (!isMobile) {
+            window.open(webLink, '_blank');
+            return;
+        }
+        
+        const start = Date.now();
+        window.location.href = deepLink;
+        
+        setTimeout(() => {
+            if (document.hidden || document.webkitHidden) return;
+            if (Date.now() - start < 2000) {
+                window.open(webLink, '_blank');
+            }
+        }, 1500);
+    }
+
+    function openAppleMaps(lat, lon) {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isMac = /Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 0;
+        
+        const deepLink = `maps://?daddr=${lat},${lon}`;
+        const webLink = `https://maps.apple.com/?daddr=${lat},${lon}`;
+        
+        if (isIOS || isMac || navigator.platform.indexOf('Mac') > -1) {
+            window.location.href = deepLink;
+        } else {
+            window.open(webLink, '_blank');
+        }
     }
 
     function handleGeolocationError(error) {
