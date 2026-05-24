@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuelier</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <header class="header">
+        <div class="lang-switcher">
+            <button id="btn-lang-es" class="btn-lang active" aria-label="Español">ES</button>
+            <button id="btn-lang-en" class="btn-lang" aria-label="English">EN</button>
+        </div>
+        <h1>⛽ Fuelier</h1>
+        <p id="app-subtitle" data-i18n="subtitle">Encuentra tu gasolinera ideal</p>
+    </header>
+
+    <main class="container">
+        <section class="controls">
+            <button id="btn-location" class="btn primary-btn" data-i18n="btn-location">
+                📍 Buscar cerca de mi ubicación
+            </button>
+            <div id="status-message" class="status" aria-live="polite"></div>
+        </section>
+
+        <!-- NUEVA SECCIÓN DE FILTROS (Oculta por defecto) -->
+        <section id="filters" class="filters hidden">
+            <div class="filter-group">
+                <label for="fuel-type" data-i18n="label-fuel">⛽ Combustible:</label>
+                <select id="fuel-type" class="filter-input">
+                    <option value="all" data-i18n="fuel-all">Cualquiera</option>
+                    <option value="gasolina" data-i18n="fuel-gasolina">Gasolina 95</option>
+                    <option value="diesel" data-i18n="fuel-diesel">Diésel</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="max-distance" data-i18n="label-distance">📏 Distancia máxima (km):</label>
+                <input type="number" id="max-distance" class="filter-input" value="15" min="1" max="100">
+            </div>
+
+            <div class="filter-group">
+                <label for="max-price" data-i18n="label-price">💶 Precio máximo (€/l):</label>
+                <input type="number" id="max-price" class="filter-input" value="2.00" step="0.05" min="0.50">
+            </div>
+
+            <div class="filter-group">
+                <label for="sort-by" data-i18n="label-sort">↕️ Ordenar por:</label>
+                <select id="sort-by" class="filter-input">
+                    <option value="price-asc" data-i18n="sort-price-asc">💶 Precio: más baratas primero</option>
+                    <option value="price-desc" data-i18n="sort-price-desc">💶 Precio: más caras primero</option>
+                    <option value="distance-asc" data-i18n="sort-distance-asc">📏 Distancia: más cercanas primero</option>
+                    <option value="distance-desc" data-i18n="sort-distance-desc">📏 Distancia: más lejanas primero</option>
+                </select>
+            </div>
+        </section>
+
+        <div id="results-header" class="results-header hidden">
+            <span id="results-count" class="results-count">Se han encontrado 0 gasolineras</span>
+            <div class="view-toggle">
+                <button id="btn-view-grid" class="btn-toggle active" title="Vista cuadrícula" data-i18n="btn-view-grid">
+                    ⊞ Cuadrícula
+                </button>
+                <button id="btn-view-list" class="btn-toggle" title="Vista lista" data-i18n="btn-view-list">
+                    ☰ Lista
+                </button>
+            </div>
+        </div>
+
+        <section id="results" class="results-grid">
+            <!-- Las tarjetas de las gasolineras se inyectarán aquí -->
+        </section>
+    </main>
+</body>
+</html>
